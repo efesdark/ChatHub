@@ -1,0 +1,27 @@
+chathubapp içesirine urls.py dosyasını oluşturdum ve ekledim 
+# chathubapp/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+]
+
+chathubapp içerisinde bir view oluşturdum
+# chathubapp/views.py
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Merhaba, ChatHub'a hoş geldiniz!")
+
+proje urllerine uygulmamı dahil ediyorum
+
+# chathub_project/urls.py
+from django.contrib import admin
+from django.urls import path, include  # include eklendi
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('chathubapp.urls')),  # uygulamanın URL'lerini dahil et
+]
+
