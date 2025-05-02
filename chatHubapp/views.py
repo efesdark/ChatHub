@@ -4,5 +4,8 @@ from django.shortcuts import render
 # chathubapp/views.py
 from django.http import HttpResponse
 
-def home(request):
+def test(request):
     return HttpResponse("Merhaba, ChatHub'a hoş geldiniz!")
+
+def home(request):
+    return render(request, 'chatHubapp/home.html')
