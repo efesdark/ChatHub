@@ -177,16 +177,82 @@ form.as_table → <tr> <td> ile gösterir.
 form.as_ul → <li> ile gösterir.
 
 
-
-
-
-
-
-
-
-
-
 Veritabanını güncellemek için:
 python manage.py makemigrations
 python manage.py migrate
 
+Login, log out,profile features
+chatHubapp/views.py
+
+
+from django.contrib.auth import authenticate,login# for profilising authenticate and loginn added
+from django.contrib.auth.decorators import login_required#added for profile section login control 
+from django.contrib.auth import logout#added for logout feature
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('profile')  # başarılıysa profil sayfasına yönlendir
+        else:
+            messages.error(request, 'Kullanıcı adı veya şifre hatalı.')
+
+    return render(request, 'chatHubapp/login.html')
+
+def user_logout(request):#added for logout feature
+    logout(request)
+    return redirect('login') # there is no logout.html page in templates it redirects to login page 
+
+@login_required#for this function login_required decarator
+def profile(request):
+    return render(request, 'chatHubapp/profile.html', {'user': request.user})
+
+logout  path added in chatHubapp/urls.py
+
+path('logout/', views.user_logout, name='logout'),
+
+
+in templates/chatHubapp folder login.html and profile.html redesigned
+
+<!-- login.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatHub Login</title>
+</head>
+<body>
+    <h1>Welcome to ChatHub!</h1>
+    <h2>Login</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="username">User Name:</label>
+    <input type="text" name="username" required><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" name="password" required><br>
+    
+    <button type="submit">Login</button>
+</form>
+    <p>Login test temple.</p>
+</body>
+</html>
+
+
+<!-- profile.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatHub Profile</title>
+</head>
+<body>
+    <h1>Welcome to ChatHub!</h1>
+    <h2>Profile Page</h2>
+<p>Welcome, {{ user.username }}!</p>
+<p>Email: {{ user.email }}</p>
+<a href="{% url 'logout' %}">Çıkış Yap</a>
+    <p>Profile test temple.</p>
+</body>
+</html>
