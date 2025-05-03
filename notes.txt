@@ -43,3 +43,41 @@ INSTALLED_APPS = [
     'chatHubapp',
     ...
 ]
+
+
+chathubapp/templates/chathubapp/ login.html, profile.html, register.html test sayfaları oluşturuldu
+chathubapp/urls güncellendi
+
+# chathubapp/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('login/', views.login, name='login'),
+    path('register/', views.register, name='register'),
+    path('profile/', views.profile, name='profile'),
+]
+
+
+chatHubapp/views  güncellendi
+from django.shortcuts import render
+
+# Create your views here.
+# chathubapp/views.py
+from django.http import HttpResponse
+
+def test(request):
+    return HttpResponse("Merhaba, ChatHub'a hoş geldiniz!")
+
+def home(request):
+    return render(request, 'chatHubapp/home.html')
+
+def login(request):
+    return render(request, 'chatHubapp/login.html')
+
+def register(request):
+    return render(request, 'chatHubapp/register.html')
+
+def profile(request):
+    return render(request, 'chatHubapp/profile.html')

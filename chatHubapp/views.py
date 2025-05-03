@@ -9,3 +9,12 @@ def test(request):
 
 def home(request):
     return render(request, 'chatHubapp/home.html')
+
+def login(request):
+    return render(request, 'chatHubapp/login.html')
+
+def register(request):
+    return render(request, 'chatHubapp/register.html')
+
+def profile(request):
+    return render(request, 'chatHubapp/profile.html')
