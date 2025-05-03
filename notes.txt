@@ -81,3 +81,112 @@ def register(request):
 
 def profile(request):
     return render(request, 'chatHubapp/profile.html')
+
+
+
+Kayıt işlemleri için  chatHubapp/forms.py oluşturuldu
+
+from django import forms #formlar dahil ediliyor
+from django.contrib.auth.models import User 
+from django.contrib.auth.forms import UserCreationForm
+
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+from django.shortcuts import render, redirect
+from .forms import RegisterForm
+from django.contrib import messages
+
+def register_view(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Hesabınız oluşturuldu! Giriş yapabilirsiniz.')
+            return redirect('login')
+    else:
+        form = RegisterForm()
+    return render(request, 'chatHubapp/register.html', {'form': form})
+
+
+chatHubapp/views.py içerisine kayıt sayfasının viewi yazıldı
+
+from django.shortcuts import render, redirect#redirect added
+from .forms import RegisterForm  #import RegisterForm class from created forms.py for user registeration
+from django.contrib import messages
+# Create your views here.
+# chathubapp/views.py
+from django.http import HttpResponse
+
+def test(request):
+    return HttpResponse("Welcome to ChatHub!")
+
+def home(request):
+    return render(request, 'chatHubapp/home.html')
+
+def login(request):
+    return render(request, 'chatHubapp/login.html')
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created, you can login now')
+            return redirect('login')
+    else:
+        form = RegisterForm()
+    return render(request, 'chatHubapp/register.html', {'form': form})
+
+def profile(request):
+    return render(request, 'chatHubapp/profile.html')
+
+
+chatHubapp/templates/chatHubapp/register.html düzenlenerek kayıt formu oluşturuldu
+
+<!-- login.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatHub Register</title>
+</head>
+<body>
+    <h1>Welcome to ChatHub!</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign Up</button>
+    </form>
+    <p>Register test temple.</p>
+</body>
+</html>
+
+
+✅ {{ form.as_p }} nedir?
+Bu satır, RegisterForm sınıfında tanımladığın alanları HTML <p> etiketleri içinde otomatik olarak render eder.
+Alternatifler:
+
+form.as_p → <p> ile gösterir.
+
+form.as_table → <tr> <td> ile gösterir.
+
+form.as_ul → <li> ile gösterir.
+
+
+
+
+
+
+
+
+
+
+
+Veritabanını güncellemek için:
+python manage.py makemigrations
+python manage.py migrate
+
