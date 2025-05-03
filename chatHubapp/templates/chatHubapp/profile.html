@@ -6,6 +6,10 @@
 </head>
 <body>
     <h1>Welcome to ChatHub!</h1>
+    <h2>Profile Page</h2>
+<p>Welcome, {{ user.username }}!</p>
+<p>Email: {{ user.email }}</p>
+<a href="{% url 'logout' %}">Çıkış Yap</a>
     <p>Profile test temple.</p>
 </body>
 </html>
