@@ -215,6 +215,11 @@ logout  path added in chatHubapp/urls.py
 path('logout/', views.user_logout, name='logout'),
 
 
+Login_URL added in chathub_project/settings.py
+LOGIN_URL = '/login/'
+
+
+
 in templates/chatHubapp folder login.html and profile.html redesigned
 
 <!-- login.html -->
@@ -256,3 +261,14 @@ in templates/chatHubapp folder login.html and profile.html redesigned
     <p>Profile test temple.</p>
 </body>
 </html>
+
+
+for building chat bot features
+pip install python-dotenv 
+
+settings.py:
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
