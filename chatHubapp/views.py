@@ -6,6 +6,11 @@ from django.contrib.auth.decorators import login_required#added for profile sect
 from django.contrib.auth import logout#added for logout feature
 # Create your views here.
 # chathubapp/views.py
+
+
+#for connecting to chatbot
+from .models import ChatMessage
+
 from django.http import HttpResponse
 
 def test(request):

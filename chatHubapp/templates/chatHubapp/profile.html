@@ -1,15 +1,41 @@
-<!-- profile.html -->
+<!-- templates/profile.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ChatHub Profile</title>
+    <meta charset="UTF-8">
+    <title>ChatHub - Profile</title>
+    <style>
+        body { font-family: Arial; background-color: #f5f5f5; }
+        #chat-box {
+            width: 60%;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            overflow-y: scroll;
+            background: white;
+            margin: 20px auto;
+        }
+        #chat-form {
+            text-align: center;
+        }
+        .message { margin: 10px 0; }
+        .user { color: blue; }
+        .bot { color: green; }
+    </style>
 </head>
 <body>
-    <h1>Welcome to ChatHub!</h1>
-    <h2>Profile Page</h2>
-<p>Welcome, {{ user.username }}!</p>
-<p>Email: {{ user.email }}</p>
-<a href="{% url 'logout' %}">Çıkış Yap</a>
-    <p>Profile test temple.</p>
+    <h2 style="text-align: center;">Welcome, {{ user.username }}</h2>
+
+    <div id="chat-box">
+        {% for message in chat_history %}
+            <div class="message"><strong class="{{ message.sender }}">{{ message.sender }}:</strong> {{ message.text }}</div>
+        {% endfor %}
+    </div>
+
+    <form id="chat-form" method="post">
+        {% csrf_token %}
+        <input type="text" name="user_input" placeholder="Say something..." required>
+        <button type="submit">Send</button>
+    </form>
 </body>
 </html>
