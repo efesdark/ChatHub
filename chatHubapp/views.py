@@ -9,6 +9,12 @@ from django.contrib.auth import logout#added for logout feature
 
 
 #for connecting to chatbot
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from openai import OpenAI
+from django.conf import settings
+
 from .models import ChatMessage
 
 from django.http import HttpResponse

@@ -272,3 +272,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+#Recreated virtual enviroment 
+I had some issues and delete venv and recreated it again
+rmdir /s /q venv  # Windows (CMD/PowerShell)
+python -m venv venv
+venv\Scripts\activate
+pip install openai
+pip install django
+pip install --upgrade django
