@@ -1,0 +1,139 @@
+<!-- templates/chat.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Django Chatbot</title>
+    <style>
+        /* Basit stil düzenlemeleri */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        #chat-container {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #f5f5f5;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            text-align: left;
+        }
+        #input-container {
+            display: flex;
+            gap: 10px;
+        }
+        #userInput {
+            flex-grow: 1;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>DialoGPT Chatbot</h1>
+    
+    <!-- Mesajların Gösterileceği Alan -->
+    <div id="chat-container"></div>
+    
+    <!-- Kullanıcı Giriş Alanı -->
+    <div id="input-container">
+        <input type="text" id="userInput" placeholder="Mesajınızı yazın..." onkeypress="handleEnter(event)">
+        <button onclick="sendMessage()">Gönder</button>
+    </div>
+
+    <script>
+        // Enter tuşu desteği
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        // Mesaj gönderme fonksiyonu
+        function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const chatContainer = document.getElementById("chat-container");
+            
+            if (!userInput.value.trim()) return;
+
+            // Kullanıcı mesajını göster
+            chatContainer.innerHTML += `
+                <div class="user-message">
+                    <strong>Siz:</strong> ${userInput.value}
+                </div>
+            `;
+
+            // API'ye istek gönder
+            fetch("/chat-api/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: `message=${encodeURIComponent(userInput.value)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Bot yanıtını göster
+                chatContainer.innerHTML += `
+                    <div class="bot-message">
+                        <strong>Bot:</strong> ${data.response}
+                    </div>
+                `;
+                
+                // Input'u temizle ve en alta kaydır
+                userInput.value = "";
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(error => {
+                chatContainer.innerHTML += `
+                    <div class="bot-message" style="color:red">
+                        Hata: ${error}
+                    </div>
+                `;
+            });
+        }
+
+        // CSRF Token alma fonksiyonu
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

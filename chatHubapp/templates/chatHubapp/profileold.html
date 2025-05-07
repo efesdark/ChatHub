@@ -1,0 +1,71 @@
+
+
+
+
+<!-- templates/profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatHub - Profile</title>
+    <!--
+    <style>
+        body { font-family: Arial; background-color: #f5f5f5; }
+        #chat-box {
+            width: 60%;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            overflow-y: scroll;
+            background: white;
+            margin: 20px auto;
+        }
+        #chat-form {
+            text-align: center;
+        }
+        .message { margin: 10px 0; }
+        .user { color: blue; }
+        .bot { color: green; }
+    </style>-->
+</head>
+<body>
+
+    <h2 style="text-align: center;">Welcome, {{ user.username }}</h2>
+<!--
+    <div id="chat-box">
+        {% for message in chat_history %}
+            <div class="message"><strong class="{{ message.sender }}">{{ message.sender }}:</strong> {{ message.text }}</div>
+        {% endfor %}
+    </div>
+
+    <form id="chat-form" method="post">
+        {% csrf_token %}
+        <input type="text" name="user_input" placeholder="Say something..." required>
+        <button type="submit">Send</button>
+    </form>-->
+    <script>
+        function sendMessage() {
+            const message = $('#message-input').val();
+            if (message) {
+                $('#message-input').val('');
+                $('#chat-box').append('<div class="message user-message">' + message + '</div>');
+    
+                $.ajax({
+                    url: '/chat/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ "message": message }),
+                    success: function(data) {
+                        $('#chat-box').append('<div class="message bot-reply">' + data.reply + '</div>');
+                        $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+                    },
+                    error: function() {
+                        $('#chat-box').append('<div class="message bot-reply">Bot bağlantı hatası.</div>');
+                    }
+                });
+            }
+        }
+    </script>
+    
+</body>
+</html>

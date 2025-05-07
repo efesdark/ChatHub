@@ -21,6 +21,7 @@ from django.urls import path,include#include added
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('chatHubapp.urls')),#application urls added
+   
 ]
 
 

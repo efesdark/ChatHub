@@ -273,6 +273,7 @@ from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+
 #Recreated virtual enviroment 
 I had some issues and delete venv and recreated it again
 rmdir /s /q venv  # Windows (CMD/PowerShell)
@@ -281,3 +282,16 @@ venv\Scripts\activate
 pip install openai
 pip install django
 pip install --upgrade django
+
+i decieded to use Huggingface for its advantages and for learning Huggingface.
+HUGGINGFACE_API_KEY=secretkey added in .env for protecting with gitignore
+
+added settings.py
+HUGGINGFACE_API_KEY= os.getenv("HUGGINGFACE_API_KEY=") 
+pip install requests
+pip install transformers torch
+
+_____
+
+todo:
+i need write to logout feature for profilising test1 always logged in this condition
