@@ -291,7 +291,278 @@ HUGGINGFACE_API_KEY= os.getenv("HUGGINGFACE_API_KEY=")
 pip install requests
 pip install transformers torch
 
+dialo gpt medium model INSTALLED_APPS
+
 _____
 
 todo:
 i need write to logout feature for profilising test1 always logged in this condition
+
+views.py:
+from django.shortcuts import render, redirect#redirect added
+from .forms import RegisterForm  #import RegisterForm class from created forms.py for user registeration
+from django.contrib import messages
+from django.contrib.auth import authenticate,login# for profilising authenticate and loginn added
+from django.contrib.auth.decorators import login_required#added for profile section login control 
+from django.contrib.auth import logout#added for logout feature
+# Create your views here.
+# chathubapp/views.py
+
+
+
+#for connecting to chatbot
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+#from openai import OpenAI
+from django.conf import settings
+import json
+import os
+#import requests
+#client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+import requests
+
+HUGGINGFACE_API_KEY= os.getenv("HUGGINGFACE_API_KEY")
+from .models import ChatMessage
+
+from django.http import HttpResponse
+
+
+
+def test(request):
+    return HttpResponse("Welcome to ChatHub!")
+
+def home(request):
+    return render(request, 'chatHubapp/home.html')
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('profile')  # başarılıysa profil sayfasına yönlendir
+        else:
+            messages.error(request, 'Kullanıcı adı veya şifre hatalı.')
+
+    return render(request, 'chatHubapp/login.html')
+
+def user_logout(request):#added for logout feature
+    logout(request)
+    return redirect('login')
+
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created, you can login now')
+            return redirect('login')
+    else:
+        form = RegisterForm()
+    return render(request, 'chatHubapp/register.html', {'form': form})
+
+@login_required#for this function login_required decarator
+def profile(request):
+
+    return render(request, 'chatHubapp/profile.html', {'user': request.user})
+#print(HUGGINGFACE_API_KEY)
+print("HUGGINGFACE_API_KEY exists:", bool(os.getenv("HUGGINGFACE_API_KEY")))
+
+def chat_view(request):
+    return render(request, 'chatHubapp/chat.html')
+
+from .chatbot import generate_response
+
+@csrf_exempt  # Geliştirme ortamında CSRF'yi devre dışı bırak (geçici)
+def chat_api(request):
+    if request.method == "POST":
+        try:
+            user_message = request.POST.get("message", "")
+            bot_response = generate_response(user_message)
+            return JsonResponse({"response": bot_response})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Sadece POST istekleri desteklenir."}, status=405)
+
+    chat.html:
+    <!-- templates/chat.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Django Chatbot</title>
+    <style>
+        /* Basit stil düzenlemeleri */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        #chat-container {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #f5f5f5;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            text-align: left;
+        }
+        #input-container {
+            display: flex;
+            gap: 10px;
+        }
+        #userInput {
+            flex-grow: 1;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>DialoGPT Chatbot</h1>
+    
+    <!-- Mesajların Gösterileceği Alan -->
+    <div id="chat-container"></div>
+    
+    <!-- Kullanıcı Giriş Alanı -->
+    <div id="input-container">
+        <input type="text" id="userInput" placeholder="Mesajınızı yazın..." onkeypress="handleEnter(event)">
+        <button onclick="sendMessage()">Gönder</button>
+    </div>
+
+    <script>
+        // Enter tuşu desteği
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        // Mesaj gönderme fonksiyonu
+        function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const chatContainer = document.getElementById("chat-container");
+            
+            if (!userInput.value.trim()) return;
+
+            // Kullanıcı mesajını göster
+            chatContainer.innerHTML += `
+                <div class="user-message">
+                    <strong>Siz:</strong> ${userInput.value}
+                </div>
+            `;
+
+            // API'ye istek gönder
+            fetch("/chat-api/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: `message=${encodeURIComponent(userInput.value)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Bot yanıtını göster
+                chatContainer.innerHTML += `
+                    <div class="bot-message">
+                        <strong>Bot:</strong> ${data.response}
+                    </div>
+                `;
+                
+                // Input'u temizle ve en alta kaydır
+                userInput.value = "";
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(error => {
+                chatContainer.innerHTML += `
+                    <div class="bot-message" style="color:red">
+                        Hata: ${error}
+                    </div>
+                `;
+            });
+        }
+
+        // CSRF Token alma fonksiyonu
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
+
+chatbot.py:
+
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Model ve tokenizer'ı yükle
+tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
+model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
+
+def generate_response(user_input, chat_history_ids=None):
+    # Tokenizer kısmını güncelle:
+    new_input = tokenizer.encode_plus(
+        user_input + tokenizer.eos_token,
+        return_tensors="pt",
+        return_attention_mask=True,
+    )
+
+    # Yanıt üretme kısmı:
+    chat_history_ids = model.generate(
+        input_ids=new_input["input_ids"],
+        attention_mask=new_input["attention_mask"],
+        max_length=1000,
+        pad_token_id=tokenizer.eos_token_id,
+        temperature=0.7,
+        do_sample=True
+    )
+
+    # Yanıtı decode et
+    bot_response = tokenizer.decode(
+        chat_history_ids[:, new_input["input_ids"].shape[-1]:][0],
+        skip_special_tokens=True
+    )
+    return bot_response
+
+
+attention_mask and eos token bugs fixed
